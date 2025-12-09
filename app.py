@@ -56,7 +56,7 @@ st.markdown(
     """
     <hr>
     <p style='text-align: center; font-size: 14px; color: gray;'>
-        Made by <strong>Mr. Dewan</strong>
+        Developed by <strong>Akash Dewan</strong>
     </p>
     """,
     unsafe_allow_html= True
@@ -77,18 +77,22 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# SIDEBAR NAVIGATION
+# Horizontal Navigation (Tabs)
 
-page = st.sidebar.selectbox(
-     "Navigation",
-     ["Home","How AI Works","Stock Analysis", "Compare Stocks","Financials"]
-)
+tabs = st.tabs([
+    "Home",
+    "Stock Analysis",
+    "Compare Stocks",
+    "Financials",
+    "How AI Works",
+    "AI Screener"
+])
+     
 
 # HOME PAGE
 
 if page == "Home":
     st.title("📊 Indian Stock Dashboard")
-    st.write("Welcome, **Mr. Dewan**")
     st.write("Welcome! Use the menu to analyze Indian stocks.")
     
     st.markdown("### 🔍 Quick Stock Lookup")
@@ -180,7 +184,7 @@ if page == "How AI Works":
     
     st.markdown("---")
     
-    st.write("Made with ❤ by *Mr. Dewan*")
+    st.write("Made by *Akash Dewan*")
 
 
     
@@ -397,7 +401,7 @@ if page == "Financials":
 if page == "Stock Analysis":
     
     st.title("📈 Stock AI Analysis")
-    st.write("Analysing for: **Mr. Dewan**")
+    st.warning("⚠ Disclaimer: This analysis is only for educational purposes. Please do your own research before investing.")
     ticker = st.text_input("Enter NSE ticker (e.g., RELIANCE.NS):")
 
     if ticker:
