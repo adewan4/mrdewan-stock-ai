@@ -458,9 +458,6 @@ with tabs[4]:
                  "Use this only for educational purposes and always do your own research."
             )
             
-        
-
-
 # STOCK ANALYSIS PAGE
 with tabs[5]:
     st.title("📈 Stock AI Analysis")
