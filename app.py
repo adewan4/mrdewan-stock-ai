@@ -420,7 +420,7 @@ with tabs[4]:
             st.warning("No tickers found in nse_list.csv.")
         else:
            
-            st.info(f"⏳ Scanning {len(tickers)} stocks... Please wait."
+            st.info(f"⏳ Scanning {len(tickers)} stocks... Please wait.")
             results = []
             progress = st.progress(0)
             total = len(tickers)
