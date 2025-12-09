@@ -1,5 +1,11 @@
 import streamlit as st
 import yfinance as yf
+import pandas as pd
+from ai_engine import(
+    fetch_basic_info,
+    calculate_scores_from_info,
+    get_news_balance_cashflow_financials,
+)
 
 # Mobile Friendly Styling
 st.set_page_config(
@@ -85,6 +91,7 @@ tabs = st.tabs([
     "Compare Stocks",
     "Financials",
     "Stock Analysis"
+    "AI Screener"
 ])
      
 
@@ -393,11 +400,70 @@ with tabs[3]:
              
              
 
+# AI Screener - Top 50 BUY/ STRONG BUY
+with tabs[4]:
+    st.title("📊 AI Screener – Top BUY & STRONG BUY")
+    st.write(
+    "This screener automatically scans a basket of major Indian stocks "
+    "and shows only those that your AI engine marks as *BUY* or *STRONG BUY*."
+    )
+    run_scan = st.button("Run Full Market Scan")
+    if run_scan:
+        # Nifty-style universe (you can expand or modify this list)
+        tickers = [
+        "RELIANCE.NS","TCS.NS","INFY.NS","HDFCBANK.NS","ICICIBANK.NS",
+        "AXISBANK.NS","KOTAKBANK.NS","SBIN.NS","LT.NS","ITC.NS",
+        "HINDUNILVR.NS","BAJFINANCE.NS","ASIANPAINT.NS","MARUTI.NS","M&M.NS",
+        "SUNPHARMA.NS","TITAN.NS","ULTRACEMCO.NS","WIPRO.NS","TECHM.NS",
+        "POWERGRID.NS","NTPC.NS","NESTLEIND.NS","BAJAJFINSV.NS","ADANIENT.NS",
+        "ADANIPORTS.NS","JSWSTEEL.NS","TATASTEEL.NS","GRASIM.NS","HCLTECH.NS",
+        "BHARTIARTL.NS","CIPLA.NS","DIVISLAB.NS","DRREDDY.NS","EICHERMOT.NS",
+        "HEROMOTOCO.NS","BRITANNIA.NS","BPCL.NS","IOC.NS","ONGC.NS",
+        "SHREECEM.NS","UPL.NS","COALINDIA.NS","SBILIFE.NS","HDFCLIFE.NS",
+        "BAJAJ-AUTO.NS","ICICIPRULI.NS","INDUSINDBK.NS","APOLLOHOSP.NS"
+        ]
+        results = []
+        st.info(f"Scanning {len(tickers)} large-cap stocks. This may take a few seconds..."
+        with st.spinner("Analyzing stocks with Dewan AI engine..."):
+            for t in tickers:
+                try:
+                    stock, info = fetch_basic_info(t)
+                    scores = calculate_scores_from_info(info)
+                    reco = scores["recommendation"]
+                    if reco in ("BUY", "STRONG BUY"):
+                        results.append({
+                        "Ticker": t,
+                        "Recommendation": reco,
+                        "Final Score": scores["final_score"],
+                        "Price": scores["price"],
+                        "Intrinsic": round(scores["intrinsic"], 2),
+                        "Growth": round(scores["growth"], 2),
+                        "Risk": round(scores["risk"], 2),
+                        "Valuation": round(scores["valuation"], 2),
+                        "Momentum": round(scores["momentum"], 2),
+                        })
+                except Exception:
+                    # Skip any stock that fails to load
+                    continue
+        if not results:
+            st.warning("No BUY or STRONG BUY candidates found in this universe right now.")
+        else:
+            import pandas as pd  # safe in case it's not at top
+            df = pd.DataFrame(results)
+            df = df.sort_values(by="Final Score", ascending=False).head(50)
+            st.success(f"Found {len(df)} AI-approved BUY / STRONG BUY stocks from {len(tickers)} scanned.")
+            st.dataframe(df, use_container_width=True)
+            st.caption(
+                 "Sorted by Final Score (highest conviction at the top). "
+                 "Use this only for educational purposes and always do your own research."
+            )
+            
+        
 
 
 # STOCK ANALYSIS PAGE
 
-with tabs[4]:
+with tabs[5]:
     
     st.title("📈 Stock AI Analysis")
     st.warning("⚠ Disclaimer: This analysis is only for educational purposes. Please do your own research before investing.")
