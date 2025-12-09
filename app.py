@@ -443,21 +443,25 @@ with tabs[4]:
                         })
                 except Exception:
                     # Skip any stock that fails to load
-                    continue
-        if not results:
-            st.warning("No BUY or STRONG BUY candidates found in this universe right now.")
-        else:
-            df = pd.DataFrame(results)
-            df = df.sort_values(by="Final Score", ascending=False).head(50)
-            st.success(f"🎉 Found {len(df)} high-conviction BUY/STRONG BUY stocks.")
-            st.dataframe(df, use_container_width=True)
-            
-            st.caption(
-            
-                "✔ These are the Top 50 highest scoring BUY/STRONG BUY stocks from the entire NSE list.\n"
-                "✔ Data fetched using Dewan AI Engine.\n"
-                "✔ For educational use only — not financial advice."
-            )
+                    pass
+                # Update progress bar
+                progress.progress((idx + 1) / total)
+
+
+            if not results:
+                st.warning("No BUY or STRONG BUY candidates found in this universe right now.")
+            else:
+                df = pd.DataFrame(results)
+                df = df.sort_values(by="Final Score", ascending=False).head(50)
+                st.success(f"🎉 Found {len(df)} high-conviction BUY/STRONG BUY stocks.")
+                st.dataframe(df, use_container_width=True)
+                
+                st.caption(
+                
+                    "✔ These are the Top 50 highest scoring BUY/STRONG BUY stocks from the entire NSE list.\n"
+                    "✔ Data fetched using Dewan AI Engine.\n"
+                    "✔ For educational use only — not financial advice."
+                )
             
 # STOCK ANALYSIS PAGE
 with tabs[5]:
