@@ -464,6 +464,7 @@ with tabs[5]:
     st.warning("⚠ Disclaimer: This analysis is only for educational purposes. Please do your own research before investing.")
     ticker = st.text_input("Enter NSE ticker (e.g., RELIANCE.NS):")
 
+
     if ticker:
         stock = yf.Ticker(ticker)
         info = stock.info
