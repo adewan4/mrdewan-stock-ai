@@ -418,45 +418,46 @@ with tabs[4]:
             tickers = []
         if not tickers:
             st.warning("No tickers found in nse_list.csv.")
-            else:
-                st.info(f"⏳ Scanning {len(tickers)} stocks... Please wait."
-                results = []
-                progress = st.progress(0)
-                total = len(tickers)
-                for idx, t in enumerate(tickers):
-                    try:
-                        stock, info = fetch_basic_info(t)
-                        scores = calculate_scores_from_info(info)
-                        # Filter only BUY and STRONG BUY
-                        if scores["recommendation"] in ("BUY", "STRONG BUY"):
-                            results.append({
-                            "Ticker": t,
-                            "Recommendation": reco,
-                            "Final Score": scores["final_score"],
-                            "Price": scores["price"],
-                            "Intrinsic": round(scores["intrinsic"], 2),
-                            "Growth": round(scores["growth"], 2),
-                            "Risk": round(scores["risk"], 2),
-                            "Valuation": round(scores["valuation"], 2),
-                            "Momentum": round(scores["momentum"], 2),
-                            })
-                    except Exception:
-                        # Skip any stock that fails to load
-                        continue
-            if not results:
-                st.warning("No BUY or STRONG BUY candidates found in this universe right now.")
-            else:
-                df = pd.DataFrame(results)
-                df = df.sort_values(by="Final Score", ascending=False).head(50)
-                st.success(f"🎉 Found {len(df)} high-conviction BUY/STRONG BUY stocks.")
-                st.dataframe(df, use_container_width=True)
-                
-                st.caption(
-                
-                    "✔ These are the Top 50 highest scoring BUY/STRONG BUY stocks from the entire NSE list.\n"
-                    "✔ Data fetched using Dewan AI Engine.\n"
-                    "✔ For educational use only — not financial advice."
-                )
+        else:
+           
+            st.info(f"⏳ Scanning {len(tickers)} stocks... Please wait."
+            results = []
+            progress = st.progress(0)
+            total = len(tickers)
+            for idx, t in enumerate(tickers):
+                try:
+                    stock, info = fetch_basic_info(t)
+                    scores = calculate_scores_from_info(info)
+                    # Filter only BUY and STRONG BUY
+                    if scores["recommendation"] in ("BUY", "STRONG BUY"):
+                        results.append({
+                        "Ticker": t,
+                        "Recommendation": reco,
+                        "Final Score": scores["final_score"],
+                        "Price": scores["price"],
+                        "Intrinsic": round(scores["intrinsic"], 2),
+                        "Growth": round(scores["growth"], 2),
+                        "Risk": round(scores["risk"], 2),
+                        "Valuation": round(scores["valuation"], 2),
+                        "Momentum": round(scores["momentum"], 2),
+                        })
+                except Exception:
+                    # Skip any stock that fails to load
+                    continue
+        if not results:
+            st.warning("No BUY or STRONG BUY candidates found in this universe right now.")
+        else:
+            df = pd.DataFrame(results)
+            df = df.sort_values(by="Final Score", ascending=False).head(50)
+            st.success(f"🎉 Found {len(df)} high-conviction BUY/STRONG BUY stocks.")
+            st.dataframe(df, use_container_width=True)
+            
+            st.caption(
+            
+                "✔ These are the Top 50 highest scoring BUY/STRONG BUY stocks from the entire NSE list.\n"
+                "✔ Data fetched using Dewan AI Engine.\n"
+                "✔ For educational use only — not financial advice."
+            )
             
 # STOCK ANALYSIS PAGE
 with tabs[5]:
