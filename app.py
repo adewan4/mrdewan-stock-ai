@@ -423,7 +423,7 @@ with tabs[4]:
         "BAJAJ-AUTO.NS","ICICIPRULI.NS","INDUSINDBK.NS","APOLLOHOSP.NS"
         ]
         results = []
-        st.info(f"Scanning {len(tickers)} large-cap stocks. This may take a few seconds..."
+        st.info(f"Scanning {len(tickers)} large-cap stocks. This may take a few seconds...")
         with st.spinner("Analyzing stocks with Dewan AI engine..."):
             for t in tickers:
                 try:
