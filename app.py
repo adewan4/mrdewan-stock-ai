@@ -402,7 +402,7 @@ with tabs[3]:
 
 # AI Screener - Top 50 BUY/ STRONG BUY
 with tabs[4]:
-    st.title("📊 AI Screener – Top BUY & STRONG BUY")
+    st.title("📊 AI Screener")
     st.write(
     "This screener automatically scans a basket of major Indian stocks "
     "and shows only those that your AI engine marks as *BUY* or *STRONG BUY*."
@@ -464,7 +464,6 @@ with tabs[4]:
 # STOCK ANALYSIS PAGE
 
 with tabs[5]:
-    
     st.title("📈 Stock AI Analysis")
     st.warning("⚠ Disclaimer: This analysis is only for educational purposes. Please do your own research before investing.")
     ticker = st.text_input("Enter NSE ticker (e.g., RELIANCE.NS):")
