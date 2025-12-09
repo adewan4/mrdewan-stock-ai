@@ -409,54 +409,54 @@ with tabs[4]:
     )
     run_scan = st.button("Run Full Market Scan")
     if run_scan:
-        # Nifty-style universe (you can expand or modify this list)
-        tickers = [
-        "RELIANCE.NS","TCS.NS","INFY.NS","HDFCBANK.NS","ICICIBANK.NS",
-        "AXISBANK.NS","KOTAKBANK.NS","SBIN.NS","LT.NS","ITC.NS",
-        "HINDUNILVR.NS","BAJFINANCE.NS","ASIANPAINT.NS","MARUTI.NS","M&M.NS",
-        "SUNPHARMA.NS","TITAN.NS","ULTRACEMCO.NS","WIPRO.NS","TECHM.NS",
-        "POWERGRID.NS","NTPC.NS","NESTLEIND.NS","BAJAJFINSV.NS","ADANIENT.NS",
-        "ADANIPORTS.NS","JSWSTEEL.NS","TATASTEEL.NS","GRASIM.NS","HCLTECH.NS",
-        "BHARTIARTL.NS","CIPLA.NS","DIVISLAB.NS","DRREDDY.NS","EICHERMOT.NS",
-        "HEROMOTOCO.NS","BRITANNIA.NS","BPCL.NS","IOC.NS","ONGC.NS",
-        "SHREECEM.NS","UPL.NS","COALINDIA.NS","SBILIFE.NS","HDFCLIFE.NS",
-        "BAJAJ-AUTO.NS","ICICIPRULI.NS","INDUSINDBK.NS","APOLLOHOSP.NS"
-        ]
-        results = []
-        st.info(f"Scanning {len(tickers)} large-cap stocks. This may take a few seconds...")
-        with st.spinner("Analyzing stocks with Dewan AI engine..."):
-            for t in tickers:
-                try:
-                    stock, info = fetch_basic_info(t)
-                    scores = calculate_scores_from_info(info)
-                    reco = scores["recommendation"]
-                    if reco in ("BUY", "STRONG BUY"):
-                        results.append({
-                        "Ticker": t,
-                        "Recommendation": reco,
-                        "Final Score": scores["final_score"],
-                        "Price": scores["price"],
-                        "Intrinsic": round(scores["intrinsic"], 2),
-                        "Growth": round(scores["growth"], 2),
-                        "Risk": round(scores["risk"], 2),
-                        "Valuation": round(scores["valuation"], 2),
-                        "Momentum": round(scores["momentum"], 2),
-                        })
-                except Exception:
-                    # Skip any stock that fails to load
-                    continue
-        if not results:
-            st.warning("No BUY or STRONG BUY candidates found in this universe right now.")
-        else:
-            import pandas as pd  # safe in case it's not at top
-            df = pd.DataFrame(results)
-            df = df.sort_values(by="Final Score", ascending=False).head(50)
-            st.success(f"Found {len(df)} AI-approved BUY / STRONG BUY stocks from {len(tickers)} scanned.")
-            st.dataframe(df, use_container_width=True)
-            st.caption(
-                 "Sorted by Final Score (highest conviction at the top). "
-                 "Use this only for educational purposes and always do your own research."
-            )
+        # STEP 1 - Load ticker list from CSV
+        try:
+            universe_df = pd.read_csv("nse_list.csv")
+            tickers = universe_df["Symbol"].dropna().unique().tolist()
+        except Exception:
+            st.error("⚠ Could not read nse_list.csv. Make sure it exists and has a column named 'Symbol'.")
+            tickers = []
+        if not tickers:
+            st.warning("No tickers found in nse_list.csv.")
+            else:
+                st.info(f"⏳ Scanning {len(tickers)} stocks... Please wait."
+                results = []
+                progress = st.progress(0)
+                total = len(tickers)
+                for idx, t in enumerate(tickers):
+                    try:
+                        stock, info = fetch_basic_info(t)
+                        scores = calculate_scores_from_info(info)
+                        # Filter only BUY and STRONG BUY
+                        if scores["recommendation"] in ("BUY", "STRONG BUY"):
+                            results.append({
+                            "Ticker": t,
+                            "Recommendation": reco,
+                            "Final Score": scores["final_score"],
+                            "Price": scores["price"],
+                            "Intrinsic": round(scores["intrinsic"], 2),
+                            "Growth": round(scores["growth"], 2),
+                            "Risk": round(scores["risk"], 2),
+                            "Valuation": round(scores["valuation"], 2),
+                            "Momentum": round(scores["momentum"], 2),
+                            })
+                    except Exception:
+                        # Skip any stock that fails to load
+                        continue
+            if not results:
+                st.warning("No BUY or STRONG BUY candidates found in this universe right now.")
+            else:
+                df = pd.DataFrame(results)
+                df = df.sort_values(by="Final Score", ascending=False).head(50)
+                st.success(f"🎉 Found {len(df)} high-conviction BUY/STRONG BUY stocks.")
+                st.dataframe(df, use_container_width=True)
+                
+                st.caption(
+                
+                    "✔ These are the Top 50 highest scoring BUY/STRONG BUY stocks from the entire NSE list.\n"
+                    "✔ Data fetched using Dewan AI Engine.\n"
+                    "✔ For educational use only — not financial advice."
+                )
             
 # STOCK ANALYSIS PAGE
 with tabs[5]:
