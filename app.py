@@ -81,17 +81,16 @@ st.markdown(
 
 tabs = st.tabs([
     "Home",
-    "Stock Analysis",
+    "How AI Works",
     "Compare Stocks",
     "Financials",
-    "How AI Works",
-    "AI Screener"
+    "Stock Analysis"
 ])
      
 
 # HOME PAGE
 
-if page == "Home":
+with tabs[0]:
     st.title("📊 Indian Stock Dashboard")
     st.write("Welcome! Use the menu to analyze Indian stocks.")
     
@@ -114,7 +113,7 @@ if page == "Home":
     
 # HOW AI Works
 
-if page == "How AI Works":
+with tabs[1]:
     st.title("🧠 How the AI Gives Recommendations")
     
     st.write("""
@@ -189,7 +188,7 @@ if page == "How AI Works":
 
     
 # COMPARE MULTIPLE STOCKS PAGE
-if page == "Compare Stocks":
+with tabs[2]:
     st.title("📊 Compare Multiple Stocks")
     tickers_input = st.text_input(
         "Enter multiple NSE tickers (comma separated):",
@@ -270,7 +269,7 @@ if page == "Compare Stocks":
 
 # FINANCIALS PAGE
 
-if page == "Financials":
+with tabs[3]:
     st.title("📑 Company Financials & Latest News")
     ticker_fin = st.text_input("Enter NSE ticker (e.g., RELIANCE.NS):")
     if ticker_fin:
@@ -398,7 +397,7 @@ if page == "Financials":
 
 # STOCK ANALYSIS PAGE
 
-if page == "Stock Analysis":
+with tabs[4]:
     
     st.title("📈 Stock AI Analysis")
     st.warning("⚠ Disclaimer: This analysis is only for educational purposes. Please do your own research before investing.")
