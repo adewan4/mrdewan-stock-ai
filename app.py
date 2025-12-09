@@ -462,7 +462,6 @@ with tabs[4]:
 
 
 # STOCK ANALYSIS PAGE
-
 with tabs[5]:
     st.title("📈 Stock AI Analysis")
     st.warning("⚠ Disclaimer: This analysis is only for educational purposes. Please do your own research before investing.")
