@@ -94,4 +94,4 @@ def calculate_scores_from_info(i: dict):
 
 def get_news_balance_cashflow_financials(ticker: str):
     s = yf.Ticker(ticker)
-    return s, s.news, s.balance_sheet, s.cashflow, s.financials
+    return s, s.news, s.balance_sheet, s.cashflow,s.financials
