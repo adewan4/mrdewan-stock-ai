@@ -90,7 +90,7 @@ tabs = st.tabs([
     "How AI Works",
     "Compare Stocks",
     "Financials",
-    "AI Screener"
+    "AI Screener",
     "Stock Analysis"
 ])
      
