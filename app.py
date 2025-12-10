@@ -444,6 +444,9 @@ with tabs[4]:
             .unique()
             .tolist()
         )
+        
+        st.write("Tickers Loaded:", len(tickers))
+        st.write("First few:", tickers[:5])
         if not tickers:
             st.warning("No tickers found in nse_list.csv.")
             st.stop()
