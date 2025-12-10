@@ -418,7 +418,8 @@ with tabs[4]:
         st.write("DEBUG — Using CSV path:", csv_path)
         
         try:
-            universe_df = pd.read_csv(csv_path)
+            universe_df = pd.read_csv(csv_path, sep=None, engine="python")
+            
         except Exception as e:
             st.error(f"⚠ Could not load nse_list.csv: {e}")
             st.stop()
