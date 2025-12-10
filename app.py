@@ -411,7 +411,7 @@ with tabs[4]:
     if run_scan:
         # STEP 1 - Load ticker list from CSV
         try:
-            universe_df = pd.read_csv("nse_list.csv")
+            universe_df = pd.read_csv(r"C:\Users\adewa\stock_mvp\nse_list.csv")
             tickers = universe_df["Symbol"].dropna().unique().tolist()
         except Exception:
             st.error("⚠ Could not read nse_list.csv. Make sure it exists and has a column named 'Symbol'.")
