@@ -427,14 +427,11 @@ with tabs[4]:
             st.stop()
         # Try to detect the Symbol column
         
-        st.write("DEBUG — Columns:",universe_df.columns.tolist())
         
         # FORCE first column to be 'Symbol'
         first_col = universe_df.columns[0]
         universe_df.rename(columns={first_col: "Symbol"}, inplace=True)
-        
-        # Debug
-        st.write("DEBUG — After rename:", universe_df.columns.tolist())            
+                    
         
         # Build ticker list
         tickers = (
