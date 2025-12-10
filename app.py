@@ -428,27 +428,29 @@ with tabs[4]:
             if "symbol" in c.lower():
                 symbol_col = c
                 break
-         if symbol_col is None:
-             st.error(f"⚠ No 'Symbol' column found. Available columns:{list(universe_df.columns)}")
-             st.stop()
+        if symbol_col is None:
+            
+            st.error(f"⚠ No 'Symbol' column found. Available columns:{list(universe_df.columns)}")
+            st.stop()
              
-             # Build ticker list
-             tickers = (
-                 universe_df[symbol_col]
-                 .dropna()
-                 .astype(str)
-                 .unique()
-                 .tolist()
-             )
-             st.write("DEBUG — Number of tickers loaded:", len(tickers))
-             if not tickers:
-                 st.warning("No tickers found in nse_list.csv after processing.")
-             else:
-                 st.info(f"⏳ Scanning {len(tickers)} stocks. This may take some time...")
-                 results = []
-                 progress = st.progress(0)
-                 total = len(tickers)
-                 for idx, t in enumerate(tickers):
+            # Build ticker list
+            tickers = (
+                universe_df[symbol_col]
+                .dropna()
+                .astype(str)
+                .unique()
+                .tolist()
+            )
+           
+            st.write("DEBUG — Number of tickers loaded:", len(tickers))
+            if not tickers:
+                st.warning("No tickers found in nse_list.csv after processing.")
+            else:
+                st.info(f"⏳ Scanning {len(tickers)} stocks. This may take some time...")
+                results = []
+                progress = st.progress(0)
+                total = len(tickers)
+                for idx, t in enumerate(tickers):
                      
                     try:
                         stock, info = fetch_basic_info(t)
