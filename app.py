@@ -413,7 +413,7 @@ with tabs[4]:
         import os
         # Always load CSV from the same folder as this app.py file
         
-        base_dir = os.path.dirname(os.path.abspath(_file_))
+        base_dir = os.path.dirname(os.path.abspath(__file__))
         csv_path = os.path.join(base_dir, "nse_list.csv")
         st.write("DEBUG — Using CSV path:", csv_path)
         
