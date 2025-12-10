@@ -451,8 +451,14 @@ with tabs[4]:
             st.write("DEBUG — Cleaned Columns:", clean_cols)
             
         # Final debug
-        st.write("DEBUG — Final CSV Columns:", list(universe_df.columns)){list(universe_df.columns)}")
-        st.stop()
+        st.write("DEBUG — Final CSV Columns:", list(universe_df.columns))
+        
+        # Verify Symbol exists
+        if "Symbol" not in universe_df.columns:
+            st.error(f"⚠ No 'Symbol' column found. Columns detected:{list(universe_df.columns)}")
+            st.stop()
+            
+        
         # Build ticker list
         tickers = (
             universe_df[symbol_col]
