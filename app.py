@@ -426,78 +426,89 @@ with tabs[4]:
         # Try to detect the Symbol column
         
         st.write("DEBUG — CSV Columns:", list(universe_df.columns))
-        # If CSV has only 1 column, rename it
-        if len(universe_df.columns) == 1:
+        
+        # 🔧 FIX BROKEN HEADER CASE: ['S', 'mbol']
+        cols = list(universe_df.columns)
+        # Case 1: header split across two columns ("S", "mbol")
+        
+        if len(cols) >= 2 and cols[0].strip().lower() == "s" and cols[1].strip().lower() == "mbol":
+            new_cols = ["Symbol"] + [f"col_{i}" for i in range(1, len(cols))]
+            universe_df.columns = new_cols
+            st.write("DEBUG — Fixed header (S + mbol → Symbol):", new_cols)
+        
+        # Case 2: Only one column but wrong name → rename to Symbol
+        elif len(cols) == 1:
             universe_df.columns = ["Symbol"]
+            st.write("DEBUG — Single column renamed to Symbol")
+        
+        # Case 3: Header present but messy BOM / whitespace → clean it
+        else:
+            clean_cols = []
+            for c in cols:
+                clean = c.replace("\ufeff", "").strip()
+                clean_cols.append(clean)
+            universe_df.columns = clean_cols
+            st.write("DEBUG — Cleaned Columns:", clean_cols)
             
-        # Auto-detect the symbol column
-        symbol_col = None
-        for c in universe_df.columns:
-            clean = c.strip().lower().replace("\ufeff","")
-            if clean == "symbol":
-                symbol_col = c
-                break
-        if symbol_col is None:
-            
-            st.error(f"⚠ No 'Symbol' column found. Available columns:{list(universe_df.columns)}")
-            st.stop()
-             
-            # Build ticker list
-            tickers = (
-                universe_df[symbol_col]
-                .dropna()
-                .astype(str)
-                .unique()
-                .tolist()
-            )
-           
-            st.write("DEBUG — Number of tickers loaded:", len(tickers))
-            if not tickers:
-                st.warning("No tickers found in nse_list.csv after processing.")
+        # Final debug
+        st.write("DEBUG — Final CSV Columns:", list(universe_df.columns)){list(universe_df.columns)}")
+        st.stop()
+        # Build ticker list
+        tickers = (
+            universe_df[symbol_col]
+            .dropna()
+            .astype(str)
+            .unique()
+            .tolist()
+        )
+       
+        st.write("DEBUG — Number of tickers loaded:", len(tickers))
+        if not tickers:
+            st.warning("No tickers found in nse_list.csv after processing.")
+        else:
+            st.info(f"⏳ Scanning {len(tickers)} stocks. This may take some time...")
+            results = []
+            progress = st.progress(0)
+            total = len(tickers)
+            for idx, t in enumerate(tickers):
+                 
+                try:
+                    stock, info = fetch_basic_info(t)
+                    scores = calculate_scores_from_info(info)
+                    # Filter only BUY and STRONG BUY
+                    if scores["recommendation"] in ("BUY", "STRONG BUY"):
+                        results.append({
+                        "Ticker": t,
+                        "Recommendation": reco,
+                        "Final Score": scores["final_score"],
+                        "Price": scores["price"],
+                        "Intrinsic": round(scores["intrinsic"], 2),
+                        "Growth": round(scores["growth"], 2),
+                        "Risk": round(scores["risk"], 2),
+                        "Valuation": round(scores["valuation"], 2),
+                        "Momentum": round(scores["momentum"], 2),
+                        })
+                except Exception:
+                    # Skip any stock that fails to load
+                    pass
+                # Update progress bar
+                progress.progress((idx + 1) / total)
+
+
+            if not results:
+                st.warning("No BUY or STRONG BUY candidates found in this universe right now.")
             else:
-                st.info(f"⏳ Scanning {len(tickers)} stocks. This may take some time...")
-                results = []
-                progress = st.progress(0)
-                total = len(tickers)
-                for idx, t in enumerate(tickers):
-                     
-                    try:
-                        stock, info = fetch_basic_info(t)
-                        scores = calculate_scores_from_info(info)
-                        # Filter only BUY and STRONG BUY
-                        if scores["recommendation"] in ("BUY", "STRONG BUY"):
-                            results.append({
-                            "Ticker": t,
-                            "Recommendation": reco,
-                            "Final Score": scores["final_score"],
-                            "Price": scores["price"],
-                            "Intrinsic": round(scores["intrinsic"], 2),
-                            "Growth": round(scores["growth"], 2),
-                            "Risk": round(scores["risk"], 2),
-                            "Valuation": round(scores["valuation"], 2),
-                            "Momentum": round(scores["momentum"], 2),
-                            })
-                    except Exception:
-                        # Skip any stock that fails to load
-                        pass
-                    # Update progress bar
-                    progress.progress((idx + 1) / total)
-
-
-                if not results:
-                    st.warning("No BUY or STRONG BUY candidates found in this universe right now.")
-                else:
-                    df = pd.DataFrame(results)
-                    df = df.sort_values(by="Final Score", ascending=False).head(50)
-                    st.success(f"🎉 Found {len(df)} high-conviction BUY/STRONG BUY stocks.")
-                    st.dataframe(df, use_container_width=True)
-                    
-                    st.caption(
-                    
-                        "✔ These are the Top 50 highest scoring BUY/STRONG BUY stocks from the entire NSE list.\n"
-                        "✔ Data fetched using Dewan AI Engine.\n"
-                        "✔ For educational use only — not financial advice."
-                    )
+                df = pd.DataFrame(results)
+                df = df.sort_values(by="Final Score", ascending=False).head(50)
+                st.success(f"🎉 Found {len(df)} high-conviction BUY/STRONG BUY stocks.")
+                st.dataframe(df, use_container_width=True)
+                
+                st.caption(
+                
+                    "✔ These are the Top 50 highest scoring BUY/STRONG BUY stocks from the entire NSE list.\n"
+                    "✔ Data fetched using Dewan AI Engine.\n"
+                    "✔ For educational use only — not financial advice."
+                )
             
 # STOCK ANALYSIS PAGE
 with tabs[5]:
