@@ -418,46 +418,21 @@ with tabs[4]:
         st.write("DEBUG — Using CSV path:", csv_path)
         
         try:
-            universe_df = pd.read_csv(csv_path, sep=None, engine="python")
+            universe_df = pd.read_csv(csv_path)
             
         except Exception as e:
             st.error(f"⚠ Could not load nse_list.csv: {e}")
             st.stop()
         # Try to detect the Symbol column
         
-        st.write("DEBUG — CSV Columns:", list(universe_df.columns))
+        st.write("DEBUG — Columns:",universe_df.columns.tolist())
         
-        # 🔧 FIX BROKEN HEADER CASE: ['S', 'mbol']
-        cols = list(universe_df.columns)
-        # Case 1: header split across two columns ("S", "mbol")
+        # FORCE first column to be 'Symbol'
+        first_col = universe_df.columns[0]
+        universe_df.rename(columns={first_col: "Symbol"}, inplace=True)
         
-        if len(cols) >= 2 and cols[0].strip().lower() == "s" and cols[1].strip().lower() == "mbol":
-            new_cols = ["Symbol"] + [f"col_{i}" for i in range(1, len(cols))]
-            universe_df.columns = new_cols
-            st.write("DEBUG — Fixed header (S + mbol → Symbol):", new_cols)
-        
-        # Case 2: Only one column but wrong name → rename to Symbol
-        elif len(cols) == 1:
-            universe_df.columns = ["Symbol"]
-            st.write("DEBUG — Single column renamed to Symbol")
-        
-        # Case 3: Header present but messy BOM / whitespace → clean it
-        else:
-            clean_cols = []
-            for c in cols:
-                clean = c.replace("\ufeff", "").strip()
-                clean_cols.append(clean)
-            universe_df.columns = clean_cols
-            st.write("DEBUG — Cleaned Columns:", clean_cols)
-            
-        # Final debug
-        st.write("DEBUG — Final CSV Columns:", list(universe_df.columns))
-        
-        # Verify Symbol exists
-        if "Symbol" not in universe_df.columns:
-            st.error(f"⚠ No 'Symbol' column found. Columns detected:{list(universe_df.columns)}")
-            st.stop()
-            
+        # Debug
+        st.write("DEBUG — After rename:", universe_df.columns.tolist())            
         
         # Build ticker list
         tickers = (
@@ -469,6 +444,7 @@ with tabs[4]:
         )
        
         st.write("DEBUG — Number of tickers loaded:", len(tickers))
+        st.write("DEBUG — First 5 tickers:", tickers[:5])
         if not tickers:
             st.warning("No tickers found in nse_list.csv after processing.")
         else:
