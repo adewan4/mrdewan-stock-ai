@@ -424,9 +424,17 @@ with tabs[4]:
             st.error(f"⚠ Could not load nse_list.csv: {e}")
             st.stop()
         # Try to detect the Symbol column
+        
+        st.write("DEBUG — CSV Columns:", list(universe_df.columns))
+        # If CSV has only 1 column, rename it
+        if len(universe_df.columns) == 1:
+            universe_df.columns = ["Symbol"]
+            
+        # Auto-detect the symbol column
         symbol_col = None
         for c in universe_df.columns:
-            if "symbol" in c.lower():
+            clean = c.strip().lower().replace("\ufeff","")
+            if clean == "symbol":
                 symbol_col = c
                 break
         if symbol_col is None:
