@@ -402,6 +402,21 @@ with tabs[3]:
 
 # AI Screener - Top 50 BUY/ STRONG BUY
 with tabs[4]:
+    import os
+    import pandas as pd
+    
+    st.subheader("🔍 DEBUG MODE (Temporary)")
+    # Check if file exists
+    st.write("DEBUG — File exists:", os.path.exists(r"C:\Users\adewa\stock_mvp\nse_list.csv"))
+    # Try loading the file
+    
+    try:
+        testdf = pd.read_csv(r"C:\Users\adewa\stock_mvp\nse_list.csv")
+        st.write("DEBUG — Row Count:", len(testdf))
+        st.write("DEBUG — First 10 Rows:")
+        st.write(testdf.head(10))
+    except Exception as e:
+        st.error(f"DEBUG — Error loading CSV: {e}")
     st.title("📊 AI Screener")
     st.write(
     "This screener automatically scans a basket of major Indian stocks "
