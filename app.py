@@ -436,7 +436,7 @@ with tabs[4]:
         
         # Build ticker list
         tickers = (
-            universe_df[symbol_col]
+            universe_df[Symbol]
             .dropna()
             .astype(str)
             .unique()
