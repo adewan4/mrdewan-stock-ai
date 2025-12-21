@@ -178,10 +178,10 @@ st.write("Made by *Akash Dewan*")
 
 # COMPARE MULTIPLE STOCKS PAGE
 with tabs[2]:
-st.title("📊 Compare Multiple Stocks")
-tickers_input = st.text_input(
-"Enter multiple NSE tickers (comma separated):",
-placeholder="Example: TCS.NS, RELIANCE.NS, HDFCBANK.NS"
+    st.title("📊 Compare Multiple Stocks")
+    tickers_input = st.text_input(
+    "Enter multiple NSE tickers (comma separated):",
+    placeholder="Example: TCS.NS, RELIANCE.NS, HDFCBANK.NS"
 )
 
 if tickers_input:
