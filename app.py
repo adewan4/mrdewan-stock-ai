@@ -185,13 +185,13 @@ with tabs[2]:
 )
 
 if tickers_input:
-tickers = [t.strip() for t in tickers_input.split(",")]
-rows = []
+    tickers = [t.strip() for t in tickers_input.split(",")]
+    rows = []
 
 for t in tickers:
-data = fetch_basic_info(t)
-if not data:
-continue
+    data = fetch_basic_info(t)
+    if not data:
+        continue
 
 scores = calculate_scores_from_info(data)
 rows.append({
@@ -204,66 +204,64 @@ rows.append({
 "Recommendation": scores["recommendation"],
 })
 if rows:
-df = pd.DataFrame(rows)
-st.dataframe(df, use_container_width=True)
+    df = pd.DataFrame(rows)
+    st.dataframe(df, use_container_width=True)
 else:
-st.warning("No valid data found.")
+    st.warning("No valid data found.")
 
 
 
 # FINANCIALS PAGE
 
 with tabs[3]:
-st.title("📑 Company Financials & Latest News")
-ticker_fin = st.text_input("Enter NSE ticker (e.g., RELIANCE.NS):")
-if ticker_fin:
-fin_data = get_news_balance_cashflow_financials(ticker_fin)
+    st.title("📑 Company Financials & Latest News")
+    ticker_fin = st.text_input("Enter NSE ticker (e.g., RELIANCE.NS):")
+    if ticker_fin:
+        fin_data = get_news_balance_cashflow_financials(ticker_fin)
 
 if not fin_data:
-st.error("Financial data unavailable.")
-st.stop()
-
+    st.error("Financial data unavailable.")
+    st.stop()
 st.subheader("📘 Balance Sheet")
+
 if fin_data["balance_sheet"] is not None:
-st.dataframe(fin_data["balance_sheet"])
+    st.dataframe(fin_data["balance_sheet"])
 
 st.subheader("💰 Cash Flow")
 if fin_data["cashflow"] is not None:
-st.dataframe(fin_data["cashflow"])
+    st.dataframe(fin_data["cashflow"])
 
 st.subheader("📈 Income Statement")
 if fin_data["financials"] is not None:
-st.dataframe(fin_data["financials"])
+    st.dataframe(fin_data["financials"])
 
 st.subheader("📰 Latest News")
 if fin_data["news"]:
-for n in fin_data["news"][:5]:
-st.write("•", n.get("title"))
+    for n in fin_data["news"][:5]:
+        st.write("•", n.get("title"))
 else:
-st.write("No news available.")
+    st.write("No news available.")
 
 
 # AI Screener - Top 50 BUY/ STRONG BUY
 with tabs[4]:
-
-st.title("📊 AI Screener")
-st.write(
-"This screener automatically scans a basket of major Indian stocks "
-"and shows only those that your AI engine marks as *BUY* or *STRONG BUY*."
+    st.title("📊 AI Screener")
+    st.write("This screener automatically scans a basket of major Indian stocks "
+    "and shows only those that your AI engine marks as *BUY* or *STRONG BUY*."
 )
 run_scan = st.button("Run Full Market Scan")
 if run_scan:
-base_dir = os.path.dirname(os.path.abspath(_file_))
-csv_path = os.path.join(base_dir, "nse_list.csv")
+    base_dir = os.path.dirname(os.path.abspath(_file_))
+    csv_path = os.path.join(base_dir, "nse_list.csv")
 
 try:
-universe_df = pd.read_csv(csv_path)
+    universe_df = pd.read_csv(csv_path)
 except Exception as e:
-st.error(f"Could not load nse_list.csv: {e}")
-st.stop()
-universe_df.rename(
-columns={universe_df.columns[0]: "Symbol"},
-inplace=True
+    st.error(f"Could not load nse_list.csv: {e}")
+    st.stop()
+    universe_df.rename(
+    columns={universe_df.columns[0]: "Symbol"},
+    inplace=True
 )
 
 tickers = (
@@ -275,38 +273,38 @@ universe_df["Symbol"]
 )
 
 if not tickers:
-st.warning("No tickers found in CSV.")
-st.stop()
-results = []
-progress = st.progress(0)
-total = len(tickers)
+    st.warning("No tickers found in CSV.")
+    st.stop()
+    results = []
+    progress = st.progress(0)
+    total = len(tickers)
 
 for idx, t in enumerate(tickers):
-data = fetch_basic_info(t)
+    data = fetch_basic_info(t)
 if not data:
-progress.progress((idx + 1) / total)
+    progress.progress((idx + 1) / total)
 continue
 
 scores = calculate_scores_from_info(data)
 if scores["recommendation"] in ("BUY", "STRONG BUY"):
-results.append({
-"Ticker": t,
-"Price": data["price"],
-"Final Score": scores["final_score"],
-"Recommendation": scores["recommendation"],
+    results.append({
+    "Ticker": t,
+    "Price": data["price"],
+    "Final Score": scores["final_score"],
+    "Recommendation": scores["recommendation"],
 })
 
 progress.progress((idx + 1) / total)
 
 
 if results:
-df = pd.DataFrame(results)
-df = df.sort_values("Final Score", ascending=False).head(50)
-st.success(f"Found {len(df)} BUY / STRONG BUY stocks")
-st.dataframe(df, use_container_width=True)
-st.caption("Educational use only. Not financial advice.")
+    df = pd.DataFrame(results)
+    df = df.sort_values("Final Score", ascending=False).head(50)
+    st.success(f"Found {len(df)} BUY / STRONG BUY stocks")
+    st.dataframe(df, use_container_width=True)
+    st.caption("Educational use only. Not financial advice.")
 else:
-st.warning("No BUY or STRONG BUY stocks found.")
+    st.warning("No BUY or STRONG BUY stocks found.")
 
 
 
@@ -314,16 +312,16 @@ st.warning("No BUY or STRONG BUY stocks found.")
 
 # STOCK ANALYSIS PAGE
 with tabs[5]:
-st.title("📈 Stock AI Analysis")
-st.warning("⚠ Disclaimer: This analysis is only for educational purposes. Please do your own research before investing.")
-ticker = st.text_input("Enter NSE ticker (e.g., RELIANCE.NS):")
+    st.title("📈 Stock AI Analysis")
+    st.warning("⚠ Disclaimer: This analysis is only for educational purposes. Please do your own research before investing.")
+    ticker = st.text_input("Enter NSE ticker (e.g., RELIANCE.NS):")
 
 
 if ticker:
-data = fetch_basic_info(ticker)
+    data = fetch_basic_info(ticker)
 if not data:
-st.error("Data unavailable right now.")
-st.stop()
+    st.error("Data unavailable right now.")
+    st.stop()
 
 scores = calculate_scores_from_info(data)
 
