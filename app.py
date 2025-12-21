@@ -95,18 +95,10 @@ tabs = st.tabs([
 
 with tabs[0]:
 st.title("📊 Indian Stock Dashboard")
-st.write("Welcome! Use the menu to analyze Indian stocks.")
-
-st.markdown("### 🔍 Quick Stock Lookup")
-quick = st.text_input("Enter NSE stock (e.g., TCS.NS):")
-
-if quick:
-data= fetch_basic_info(quick)
-if not data:
-st.error("Data temporairi;y unavilable.")
-else:
-st.metric("Current Price", data["price"])
-
+st.write(
+   "This app analyzes Indian stocks using a custom AI logic based on "
+   "financial performance, growth trends, and risk factors."
+)
 
 # HOW AI Works
 
