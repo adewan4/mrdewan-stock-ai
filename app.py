@@ -99,6 +99,16 @@ with tabs[0]:
        "This app analyzes Indian stocks using a custom AI logic based on "
        "financial performance, growth trends, and risk factors."
     )
+    
+    st.markdown("### 🔍 Quick Stock Lookup")
+    quick = st.text_input("Enter NSE ticker (e.g., TCS.NS):")
+    
+    if quick:
+        data = fetch_basic_info(quick)
+        if not data:
+            st.error("Data temporarily unavailable.")
+        else:
+            st.metric("Current Price", data["price"])
 
 # HOW AI Works
 
@@ -253,58 +263,57 @@ run_scan = st.button("Run Full Market Scan")
 if run_scan:
     base_dir = os.path.dirname(os.path.abspath(_file_))
     csv_path = os.path.join(base_dir, "nse_list.csv")
-
-try:
-    universe_df = pd.read_csv(csv_path)
-except Exception as e:
-    st.error(f"Could not load nse_list.csv: {e}")
-    st.stop()
+    try:
+        universe_df = pd.read_csv(csv_path)
+    except Exception as e:
+        st.error(f"Could not load nse_list.csv: {e}")
+        st.stop()
     universe_df.rename(
-    columns={universe_df.columns[0]: "Symbol"},
-    inplace=True
+      columns={universe_df.columns[0]: "Symbol"},
+      inplace=True
 )
 
-tickers = (
-universe_df["Symbol"]
-.dropna()
-.astype(str)
-.unique()
-.tolist()
-)
+    tickers = (
+    universe_df["Symbol"]
+    .dropna()
+    .astype(str)
+    .unique()
+    .tolist()
+    )
 
-if not tickers:
-    st.warning("No tickers found in CSV.")
-    st.stop()
-    results = []
-    progress = st.progress(0)
-    total = len(tickers)
+    if not tickers:
+        st.warning("No tickers found in CSV.")
+        st.stop()
+        results = []
+        progress = st.progress(0)
+        total = len(tickers)
 
-for idx, t in enumerate(tickers):
-    data = fetch_basic_info(t)
-if not data:
-    progress.progress((idx + 1) / total)
-continue
+        for idx, t in enumerate(tickers):
+            data = fetch_basic_info(t)
+            if not data:
+                progress.progress((idx + 1) / total)
+                continue
 
-scores = calculate_scores_from_info(data)
-if scores["recommendation"] in ("BUY", "STRONG BUY"):
-    results.append({
-    "Ticker": t,
-    "Price": data["price"],
-    "Final Score": scores["final_score"],
-    "Recommendation": scores["recommendation"],
-})
+            scores = calculate_scores_from_info(data)
+            if scores["recommendation"] in ("BUY", "STRONG BUY"):
+                results.append({
+                "Ticker": t,
+                "Price": data["price"],
+                "Final Score": scores["final_score"],
+                "Recommendation": scores["recommendation"],
+                })
 
-progress.progress((idx + 1) / total)
+            progress.progress((idx + 1) / total)
 
 
-if results:
-    df = pd.DataFrame(results)
-    df = df.sort_values("Final Score", ascending=False).head(50)
-    st.success(f"Found {len(df)} BUY / STRONG BUY stocks")
-    st.dataframe(df, use_container_width=True)
-    st.caption("Educational use only. Not financial advice.")
-else:
-    st.warning("No BUY or STRONG BUY stocks found.")
+        if results:
+            df = pd.DataFrame(results)
+            df = df.sort_values("Final Score", ascending=False).head(50)
+            st.success(f"Found {len(df)} BUY / STRONG BUY stocks")
+            st.dataframe(df, use_container_width=True)
+            st.caption("Educational use only. Not financial advice.")
+        else:
+            st.warning("No BUY or STRONG BUY stocks found.")
 
 
 
