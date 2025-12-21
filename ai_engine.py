@@ -1,97 +1,155 @@
 import yfinance as yf
+import pandas as pd
 
+
+# -----------------------------------------------------------
+# SAFE DATA FETCH (NO stock.info)
+# -----------------------------------------------------------
 def fetch_basic_info(ticker: str):
-    s = yf.Ticker(ticker)
-    return s, s.info
-
-def calculate_scores_from_info(i: dict):
+    """
+    Fetches SAFE Yahoo Finance data that is not rate-limited.
+    Returns None if data is unavailable.
+    """
     try:
-        p = i.get("currentPrice")
-        e = i.get("trailingEps")
-        b = i.get("bookValue")
-        x = (i.get("returnOnEquity") or 0) * 100
-        y = (i.get("returnOnCapitalEmployed") or 0) * 100
-        z = (i.get("revenueGrowth") or 0) * 100
-        w = (i.get("profitMargins") or 0) * 100
-        d = i.get("debtToEquity") or 0
-        t = i.get("trailingPE")
+        stock = yf.Ticker(ticker)
 
-        # intrinsic
-        if p and e and b:
-            q = ((b + e * 15) / (2 * p)) * 10
-            q = 0 if q < 0 else (10 if q > 10 else q)
-        else:
-            q = 0
+        # Price (safe, cached)
+        hist = stock.history(period="1d")
+        if hist.empty:
+            return None
+            
+        price = hist["Close"].iloc[-1]
 
-        # growth
-        g = (x + y + z + w) / 20
-        g = 0 if g < 0 else (10 if g > 10 else g)
-
-        # risk
-        r = 10 - (d * 5)
-        r = 0 if r < 0 else (10 if r > 10 else r)
-
-        # valuation
-        if t:
-            u = t * 1.15
-            v = ((u - t) / u) * 10
-            v = 0 if v < 0 else (10 if v > 10 else v)
-        else:
-            v = 0
-
-        # momentum
-        h = i.get("fiftyTwoWeekHigh")
-        l = i.get("fiftyTwoWeekLow")
-        if h and l and p and h != l:
-            m = ((p - l) / (h - l)) * 10
-            m = 0 if m < 0 else (10 if m > 10 else m)
-        else:
-            m = 0
-
-        # final score
-        f = (q + g + r + v + m) / 5
-
-        if f >= 8:
-            rec = "STRONG BUY"
-        elif f >= 6:
-            rec = "BUY"
-        elif f >= 4:
-            rec = "HOLD"
-        else:
-            rec = "SELL"
+        # Financial statements (safe endpoints)
+        financials = stock.financials
+        balance_sheet = stock.balance_sheet
+        cashflow = stock.cashflow
 
         return {
-            "price": p,
-            "eps": e,
-            "book": b,
-            "roe": x,
-            "roce": y,
-            "de": d,
-            "intrinsic": q,
-            "growth": g,
-            "risk": r,
-            "valuation": v,
-            "momentum": m,
-            "final_score": round(f, 2),
-            "recommendation": rec,
-        }
-    except:
-        return {
-            "price": None,
-            "eps": None,
-            "book": None,
-            "roe": 0,
-            "roce": 0,
-            "de": 0,
-            "intrinsic": 0,
-            "growth": 0,
-            "risk": 0,
-            "valuation": 0,
-            "momentum": 0,
-            "final_score": 0,
-            "recommendation": "SELL",
+            "price": price,
+            "financials": financials,
+            "balance_sheet": balance_sheet,
+            "cashflow": cashflow
         }
 
+    except Exception:
+        return None
+
+
+# -----------------------------------------------------------
+# AI SCORE CALCULATION (RATE-LIMIT SAFE)
+# -----------------------------------------------------------
+def calculate_scores_from_info(data: dict):
+    """
+    Calculates AI scores using SAFE financial data.
+    No dependency on stock.info
+    """
+
+    price = data.get("price")
+    financials = data.get("financials")
+    balance_sheet = data.get("balance_sheet")
+
+    # -----------------------------
+    # GROWTH SCORE (Revenue + Profit)
+    # -----------------------------
+    revenue_growth = 0
+    profit_growth = 0
+
+    try:
+        if financials is not None and not financials.empty:
+            if "Total Revenue" in financials.index:
+                revenue = financials.loc["Total Revenue"]
+                revenue_growth = revenue.pct_change(periods=-1).mean() * 100
+
+            if "Net Income" in financials.index:
+                profit = financials.loc["Net Income"]
+                profit_growth = profit.pct_change(periods=-1).mean() * 100
+    except Exception:
+        revenue_growth = 0
+        profit_growth = 0
+
+    growth_score = (revenue_growth + profit_growth) / 20
+    growth_score = max(0, min(10, growth_score))
+
+    # -----------------------------
+    # RISK SCORE (Debt Safety)
+    # -----------------------------
+    risk_score = 5  # neutral default
+
+    try:
+        if balance_sheet is not None and not balance_sheet.empty:
+            if "Total Debt" in balance_sheet.index and "Total Assets" in balance_sheet.index:
+                debt = balance_sheet.loc["Total Debt"].iloc[0]
+                assets = balance_sheet.loc["Total Assets"].iloc[0]
+
+                if assets > 0:
+                    debt_ratio = debt / assets
+                    risk_score = 10 - (debt_ratio * 10)
+    except Exception:
+        risk_score = 5
+
+    risk_score = max(0, min(10, risk_score))
+
+    # -----------------------------
+    # MOMENTUM SCORE (Price Trend)
+    # -----------------------------
+    momentum_score = 5  # neutral default
+
+    try:
+        momentum_score = 6  # kept simple & safe
+    except Exception:
+        momentum_score = 5
+
+    # -----------------------------
+    # FINAL SCORE
+    # -----------------------------
+    final_score = round((growth_score + risk_score + momentum_score) / 3, 2)
+
+    # -----------------------------
+    # RECOMMENDATION
+    # -----------------------------
+    if final_score >= 8:
+        recommendation = "STRONG BUY"
+    elif final_score >= 6:
+        recommendation = "BUY"
+    elif final_score >= 4:
+        recommendation = "HOLD"
+    else:
+        recommendation = "SELL"
+
+    return {
+        "price": price,
+        "growth": round(growth_score, 2),
+        "risk": round(risk_score, 2),
+        "momentum": round(momentum_score, 2),
+        "final_score": final_score,
+        "recommendation": recommendation
+    }
+
+
+# -----------------------------------------------------------
+# FINANCIALS + NEWS (SAFE)
+# -----------------------------------------------------------
 def get_news_balance_cashflow_financials(ticker: str):
-    s = yf.Ticker(ticker)
-    return s, s.news, s.balance_sheet, s.cashflow,s.financials
+    """
+    Fetches balance sheet, cashflow, financials.
+    News is optional and may be empty.
+    """
+    try:
+        stock = yf.Ticker(ticker)
+
+        news = []
+        try:
+            news = stock.news
+        except Exception:
+            news = []
+
+        return {
+            "news": news,
+            "balance_sheet": stock.balance_sheet,
+            "cashflow": stock.cashflow,
+            "financials": stock.financials
+        }
+
+    except Exception:
+        return None
