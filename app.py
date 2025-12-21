@@ -94,22 +94,22 @@ tabs = st.tabs([
 # HOME PAGE
 
 with tabs[0]:
-st.title("📊 Indian Stock Dashboard")
-st.write(
-   "This app analyzes Indian stocks using a custom AI logic based on "
-   "financial performance, growth trends, and risk factors."
-)
+    st.title("📊 Indian Stock Dashboard")
+    st.write(
+       "This app analyzes Indian stocks using a custom AI logic based on "
+       "financial performance, growth trends, and risk factors."
+    )
 
 # HOW AI Works
 
 with tabs[1]:
-st.title("🧠 How the AI Gives Recommendations")
-
-st.write("""
-This page explains the logic behind the AI engine created by *Mr. Dewan*.
-The AI uses five key financial pillars to analyze any stock and generate a
-final recommendation such as *STRONG BUY, **BUY, **HOLD, or **SELL*.
+    st.title("🧠 How the AI Gives Recommendations")
+    st.write("""
+    This page explains the logic behind the AI engine created by *Mr. Dewan*.
+    The AI uses five key financial pillars to analyze any stock and generate a
+    final recommendation such as *STRONG BUY, **BUY, **HOLD, or **SELL*.
 """)
+
 st.markdown("---")
 st.subheader("📌 1. Intrinsic Value Score")
 st.write("""
