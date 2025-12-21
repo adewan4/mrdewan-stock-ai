@@ -1,10 +1,7 @@
 import streamlit as st
 import pandas as pd
-from ai_engine import(
-    fetch_basic_info,
-    calculate_scores_from_info,
-    get_news_balance_cashflow_financials
-)
+import os
+from ai_engine import fetch_basic_info, calculate_scores_from_info,get_news_balance_cashflow_financials
 
 # Mobile Friendly Styling
 st.set_page_config(
