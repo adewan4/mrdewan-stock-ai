@@ -1,2 +1,2 @@
 import streamlit as st
-st.write("App is running clean")
+st.write("App is runningÂ clean")
