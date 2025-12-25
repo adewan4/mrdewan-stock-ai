@@ -39,7 +39,11 @@ def calculate_scores_from_info(info):
 
     risk = max(0, min(10, 10 - (de * 5)))
 
-    if pe and pe > 0:
+    try:
+        pe = float(pe)
+    except (TypeError, ValueError):
+        pe = 0
+    if pe > 0:
         industry_pe = pe * 1.15
         valuation = ((industry_pe - pe) / industry_pe) * 10
         valuation = max(0, min(10, valuation))
