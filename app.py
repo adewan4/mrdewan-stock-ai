@@ -1,171 +1,197 @@
 import streamlit as st
+import pandas as pd
+import time
 from ai_engine import fetch_basic_info, calculate_scores_from_info
 
-
-# ---------------------------
-# PAGE CONFIG
-# ---------------------------
+# -------------------------------------------------
+# PAGE CONFIG + MOBILE FRIENDLY
+# -------------------------------------------------
 st.set_page_config(
     page_title="Indian Stock AI Dashboard",
     layout="wide"
 )
 
-# ---------------------------
-# GLOBAL STYLES (Mobile Friendly)
-# ---------------------------
-st.markdown(
-    """
-    <style>
-        body {
-            font-size: 16px;
-        }
-        footer {visibility: hidden;}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+@media (max-width: 600px) {
+    .block-container {
+        padding: 1rem !important;
+    }
+}
+.stButton>button {
+    width: 100%;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# ---------------------------
-# HEADER
-# ---------------------------
-st.title("📊 Indian Stock AI Dashboard")
-st.caption("Developed by Akash Dewan")
+# -------------------------------------------------
+# FOOTER
+# -------------------------------------------------
+st.markdown("""
+<hr>
+<p style="text-align:center;font-size:13px;color:gray;">
+Developed by <b>Akash Dewan</b> | Educational purpose only
+</p>
+""", unsafe_allow_html=True)
 
-# ---------------------------
-# NAVIGATION TABS
-# ---------------------------
+# -------------------------------------------------
+# TABS
+# -------------------------------------------------
 tabs = st.tabs([
     "Home",
     "How AI Works",
-    "Stock Analysis",
+    "Compare Stocks",
     "Financials",
-    "AI Screener"
+    "AI Screener",
+    "Stock Analysis"
 ])
 
-# ---------------------------
-# HOME TAB
-# ---------------------------
+# -------------------------------------------------
+# HOME
+# -------------------------------------------------
 with tabs[0]:
-    st.subheader("Welcome 👋")
+    st.title("📊 Indian Stock AI Dashboard")
     st.write(
-        """
-        This app analyzes Indian stocks using a rule-based AI engine.
-        
-        ✔ Fundamental analysis  
-        ✔ Risk & growth scoring  
-        ✔ Valuation & momentum checks  
-        
-        Use the tabs above to explore.
-        """
+        "Analyze Indian stocks using a transparent, rule-based AI engine. "
+        "This app helps you understand *valuation, growth, risk, and momentum*."
     )
 
-# ---------------------------
-# HOW AI WORKS TAB
-# ---------------------------
-with tabs[1]:
-    st.subheader("🧠 How the AI Works")
-
-    st.write(
-        """
-        The AI evaluates stocks using *5 key pillars*:
-        
-        ⿡ Intrinsic Value  
-        ⿢ Growth  
-        ⿣ Risk  
-        ⿤ Valuation  
-        ⿥ Momentum  
-
-        Each pillar is scored from *0 to 10*.
-        The final recommendation is an average of these scores.
-        """
-    )
-
-    st.markdown(
-        """
-        *Final Recommendation Logic*
-        - 8 – 10 → *STRONG BUY*
-        - 6 – 7.9 → *BUY*
-        - 4 – 5.9 → *HOLD*
-        - Below 4 → *SELL*
-        """
-    )
-
-# ---------------------------
-# STOCK ANALYSIS TAB
-# ---------------------------
-with tabs[2]:
-    st.subheader("📈 Stock Analysis")
-    st.warning(
-        "⚠ This analysis is for educational purposes only. "
-        "Always do your own research before investing."
-    )
-
-    ticker = st.text_input(
-      "Enter NSE stock ticker (example: TCS.NS, RELIANCE.NS):"
-    )
-    
+    ticker = st.text_input("Quick stock lookup (e.g. TCS.NS)")
     if ticker:
-        with st.spinner("Analyzing stock with AI engine..."):
-            stock, info = fetch_basic_info(ticker)
-        if not info:
-            st.error("Unable to fetch data for this stock. Please try later.")
-        else:
+        stock, info = fetch_basic_info(ticker)
+        if info:
             scores = calculate_scores_from_info(info)
-            
-            st.metric(
-                label="Current Price",
-                value=f"₹ {scores['price']}"
-            )
+            st.metric("Current Price", scores["price"])
+            st.success(f"Recommendation: {scores['recommendation']}")
+        else:
+            st.error("Data temporarily unavailable.")
 
-            st.markdown("### 🧠 AI Score Breakdown")
+# -------------------------------------------------
+# HOW AI WORKS
+# -------------------------------------------------
+with tabs[1]:
+    st.title("🧠 How the AI Works")
 
-            col1, col2, col3 = st.columns(3)
+    st.markdown("""
+This AI *does NOT predict prices*.  
+It *scores stocks objectively* using 5 pillars:
 
-            col1.metric("Intrinsic", round(scores["intrinsic"], 2))
-            col1.metric("Growth", round(scores["growth"], 2))
+### ⿡ Intrinsic Value
+Is the stock undervalued compared to earnings & book value?
 
-            col2.metric("Risk", round(scores["risk"], 2))
-            col2.metric("Valuation", round(scores["valuation"], 2))
+### ⿢ Growth
+ROE, ROCE, revenue growth, profit margins.
 
-            col3.metric("Momentum", round(scores["momentum"], 2))
-            col3.metric("Final Score", scores["final_score"])
+### ⿣ Risk
+Debt-to-equity — lower debt = higher score.
 
-            st.markdown("---")
+### ⿤ Valuation
+Compares stock PE with industry-adjusted PE.
 
-            reco = scores["recommendation"]
+### ⿥ Momentum
+Position of price between 52-week high & low.
 
-            if reco == "STRONG BUY":
-                st.success(f"📈 Final Recommendation: *{reco}*")
-            elif reco == "BUY":
-                st.info(f"✅ Final Recommendation: *{reco}*")
-            elif reco == "HOLD":
-                st.warning(f"⏸ Final Recommendation: *{reco}*")
-            else:
-                st.error(f"⚠ Final Recommendation: *{reco}*")
+### 🎯 Final Score
+Average of all 5 → recommendation:
+- *8+* → STRONG BUY
+- *6–7.9* → BUY
+- *4–5.9* → HOLD
+- *<4* → SELL
 
+⚠ Educational use only. Always do your own research.
+""")
 
-# ---------------------------
-# FINANCIALS TAB
-# ---------------------------
-with tabs[3]:
-    st.subheader("📑 Financials")
-    st.write("Company financial statements and trends will appear here.")
+# -------------------------------------------------
+# COMPARE STOCKS
+# -------------------------------------------------
+with tabs[2]:
+    st.title("📊 Compare Stocks")
 
-# ---------------------------
-# AI SCREENER TAB
-# ---------------------------
-with tabs[4]:
-    st.subheader("🤖 AI Screener")
-    st.write(
-        """
-        This screener will scan *the entire NSE stock universe*
-        and return the *top 50 BUY / STRONG BUY stocks* daily.
-        """
+    tickers_input = st.text_input(
+        "Enter NSE tickers (comma separated)",
+        placeholder="TCS.NS, RELIANCE.NS, INFY.NS"
     )
 
-# ---------------------------
-# FOOTER
-# ---------------------------
-st.markdown("---")
-st.caption("© Developed by Akash Dewan")
+    if tickers_input:
+        tickers = [t.strip() for t in tickers_input.split(",")]
+        rows = []
+
+        for t in tickers:
+            stock, info = fetch_basic_info(t)
+            if info:
+                scores = calculate_scores_from_info(info)
+                rows.append({
+                    "Ticker": t,
+                    "Price": scores["price"],
+                    "Final Score": scores["final_score"],
+                    "Recommendation": scores["recommendation"]
+                })
+
+        if rows:
+            st.dataframe(pd.DataFrame(rows), use_container_width=True)
+
+# -------------------------------------------------
+# FINANCIALS (LIGHT VERSION)
+# -------------------------------------------------
+with tabs[3]:
+    st.title("📑 Financials")
+
+    ticker = st.text_input("Enter ticker for financials")
+    if ticker:
+        stock, info = fetch_basic_info(ticker)
+        if info:
+            st.write("Market Cap:", info.get("marketCap"))
+            st.write("PE Ratio:", info.get("trailingPE"))
+            st.write("Dividend Yield:", info.get("dividendYield"))
+        else:
+            st.error("Unable to fetch financial data.")
+
+# -------------------------------------------------
+# AI SCREENER
+# -------------------------------------------------
+with tabs[4]:
+    st.title("🤖 AI Screener (Top 50)")
+
+    if st.button("Run Full NSE Scan"):
+        df = pd.read_csv("nse_list.csv")
+        df.rename(columns={df.columns[0]: "Symbol"}, inplace=True)
+        tickers = df["Symbol"].dropna().unique().tolist()
+
+        results = []
+        progress = st.progress(0)
+
+        for i, t in enumerate(tickers):
+            stock, info = fetch_basic_info(t)
+            if info:
+                scores = calculate_scores_from_info(info)
+                if scores["recommendation"] in ("BUY", "STRONG BUY"):
+                    results.append({
+                        "Ticker": t,
+                        "Score": scores["final_score"],
+                        "Recommendation": scores["recommendation"]
+                    })
+            progress.progress((i + 1) / len(tickers))
+            time.sleep(0.2)
+
+        if results:
+            out = pd.DataFrame(results).sort_values("Score", ascending=False).head(50)
+            st.dataframe(out, use_container_width=True)
+        else:
+            st.warning("No strong opportunities today.")
+
+# -------------------------------------------------
+# STOCK ANALYSIS
+# -------------------------------------------------
+with tabs[5]:
+    st.title("📈 Stock Analysis")
+    st.warning("Educational purpose only.")
+
+    ticker = st.text_input("Enter NSE ticker")
+    if ticker:
+        stock, info = fetch_basic_info(ticker)
+        if info:
+            scores = calculate_scores_from_info(info)
+            st.metric("Price", scores["price"])
+            st.write(scores)
+
 
