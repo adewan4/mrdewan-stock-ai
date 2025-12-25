@@ -1,16 +1,7 @@
 import time
 import yfinance as yf
 
-# -------------------------------------------------
-# SAFE FETCH WITH RETRY (RATE-LIMIT PROTECTION)
-# -------------------------------------------------
-
-def fetch_basic_info(ticker: str, retries: int = 2, delay: float = 1.5):
-    """
-    Safely fetch yfinance Ticker object and info dict.
-    Retries automatically if Yahoo rate-limits.
-    """
-    
+def fetch_basic_info(ticker, retries=2, delay=1.5):
     for attempt in range(retries + 1):
         try:
             stock = yf.Ticker(ticker)
@@ -23,17 +14,8 @@ def fetch_basic_info(ticker: str, retries: int = 2, delay: float = 1.5):
             else:
                 return None, {}
     return None, {}
-
-
-# -------------------------------------------------
-# AI SCORE CALCULATION (RULE-BASED)
-# -------------------------------------------------
-def calculate_scores_from_info(info: dict):
-    """
-    Computes AI scores using defensive defaults.
-    Never raises exceptions.
-    """
-
+    
+def calculate_scores_from_info(info):
     price = info.get("currentPrice") or 0
     eps = info.get("trailingEps") or 0
     book = info.get("bookValue") or 0
@@ -42,29 +24,21 @@ def calculate_scores_from_info(info: dict):
     roce = (info.get("returnOnCapitalEmployed") or 0) * 100
     de = info.get("debtToEquity") or 0
 
-    revenue_growth = (info.get("revenueGrowth") or 0) * 100
-    profit_margin = (info.get("profitMargins") or 0) * 100
+    rg = (info.get("revenueGrowth") or 0) * 100
+    pm = (info.get("profitMargins") or 0) * 100
 
     pe = info.get("trailingPE")
-    high_52 = info.get("fiftyTwoWeekHigh")
-    low_52 = info.get("fiftyTwoWeekLow")
+    high = info.get("fiftyTwoWeekHigh")
+    low = info.get("fiftyTwoWeekLow")
 
-    # Intrinsic
-    if price > 0 and eps > 0 and book > 0:
-        intrinsic = ((book + eps * 15) / (2 * price)) * 10
-    else:
-        intrinsic = 0
+    intrinsic = ((book + eps * 15) / (2 * price)) * 10 if price and eps and book else 0
     intrinsic = max(0, min(10, intrinsic))
 
-    # Growth
-    growth = (roe + roce + revenue_growth + profit_margin) / 20
+    growth = (roe + roce + rg + pm) / 20
     growth = max(0, min(10, growth))
 
-    # Risk
-    risk = 10 - (de * 5)
-    risk = max(0, min(10, risk))
+    risk = max(0, min(10, 10 - (de * 5)))
 
-    # Valuation
     if pe and pe > 0:
         industry_pe = pe * 1.15
         valuation = ((industry_pe - pe) / industry_pe) * 10
@@ -72,49 +46,30 @@ def calculate_scores_from_info(info: dict):
     else:
         valuation = 0
 
-    # Momentum
-    if high_52 and low_52 and price > 0 and high_52 != low_52:
-        momentum = ((price - low_52) / (high_52 - low_52)) * 10
+    if high and low and price and high != low:
+        momentum = ((price - low) / (high - low)) * 10
         momentum = max(0, min(10, momentum))
     else:
         momentum = 0
 
-    final_score = round(
-        (intrinsic + growth + risk + valuation + momentum) / 5, 2
-    )
+    final = round((intrinsic + growth + risk + valuation + momentum) / 5, 2)
 
-    if final_score >= 8:
-        recommendation = "STRONG BUY"
-    elif final_score >= 6:
-        recommendation = "BUY"
-    elif final_score >= 4:
-        recommendation = "HOLD"
+    if final >= 8:
+        reco = "STRONG BUY"
+    elif final >= 6:
+        reco = "BUY"
+    elif final >= 4:
+        reco = "HOLD"
     else:
-        recommendation = "SELL"
+        reco = "SELL"
 
-    return {
-        "price": price,
-        "intrinsic": intrinsic,
-        "growth": growth,
-        "risk": risk,
-        "valuation": valuation,
-        "momentum": momentum,
-        "final_score": final_score,
-        "recommendation": recommendation,
-    }
-
-
-# -------------------------------------------------
-# OPTIONAL FINANCIALS + NEWS
-# -------------------------------------------------
-def get_news_balance_cashflow_financials(ticker: str):
-    try:
-        stock = yf.Ticker(ticker)
-        return (
-            stock.news or [],
-            stock.balance_sheet,
-            stock.cashflow,
-            stock.financials,
-        )
-    except Exception:
-        return [], None, None, None
+    return{
+        "price":price,
+        "intrinsic":intrinsic,
+        "growth":growth,
+        "risk":risk,
+        "valuation":valuation,
+        "momentum":momentum,
+        "final_score":final,
+        "recommendation":reco,
+}
