@@ -213,7 +213,7 @@ with tabs[6]:
     st.warning("Educational use only. Not financial advice.")
     
     if st.button("Run Intraday Scan"):
-        base_dir = os.path.dirname(os.path.abspath(_file_))
+        base_dir = os.path.dirname(os.path.abspath(__file__))
         csv_path = os.path.join(base_dir, "nse_list.csv")
         
         df_universe = pd.read_csv(csv_path)
