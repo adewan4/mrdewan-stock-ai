@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
-import time
-from ai_engine import fetch_basic_info, calculate_scores_from_info
+import yfinance as yf
+import os
+from ai_engine import fetch_basic_info, calculate_scores_from_info, intraday_signal
 
 # -------------------------------------------------
 # PAGE CONFIG + MOBILE FRIENDLY
@@ -44,6 +45,7 @@ tabs = st.tabs([
     "Financials",
     "AI Screener",
     "Stock Analysis"
+    "⚡ Intraday Screener",
 ])
 
 # -------------------------------------------------
@@ -195,3 +197,45 @@ with tabs[5]:
             st.write(scores)
 
 
+# ⚡ INTRADAY SCREENER
+with tabs[6]:
+    st.title("⚡ Intraday Trading Screener")
+    st.warning("Educational use only. Not financial advice.")
+    
+    if st.button("Run Intraday Scan"):
+        base_dir = os.path.dirname(os.path.abspath(_file_))
+        csv_path = os.path.join(base_dir, "nse_list.csv")
+        
+        df_universe = pd.read_csv(csv_path)
+        df_universe.rename(columns={df_universe.columns[0]: "Symbol"},inplace=True)
+        
+        tickers = (
+           df_universe["Symbol"]
+           .dropna()
+           .astype(str)
+           .unique()
+           .tolist()
+        )
+        
+        results = []
+        progress = st.progress(0)
+        
+        for i, t in enumerate(tickers):
+            signal = intraday_signal(t)
+            if signal and signal["direction"] != "NO TRADE":
+                results.append({
+                  "Ticker": t,
+                  "Direction": signal["direction"],
+                  "Confidence": signal["confidence"],
+                  "Price": signal["price"],
+                  "Reason": signal["reason"],
+                })
+            progress.progress((i + 1) / len(tickers))
+            
+        if results:
+            df = pd.DataFrame(results).sort_values(
+              "Confidence", ascending=False
+            ).head(20)
+            st.dataframe(df, use_container_width=True)
+        else:
+            st.warning("No intraday opportunities found.")
