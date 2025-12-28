@@ -67,6 +67,9 @@ with tabs[0]:
             st.success(f"Recommendation: {scores['recommendation']}")
         else:
             st.error("Data temporarily unavailable.")
+            
+    st.markdown("---")
+    st.write("➡ Go to *Stock Analysis* for full AI analysis.")
 
 # -------------------------------------------------
 # HOW AI WORKS
@@ -75,7 +78,7 @@ with tabs[1]:
     st.title("🧠 How the AI Gives Recommendations")
 
     st.markdown("""
-This page explains the logic behind the AI engine created by *Mr. Dewan*.
+This page explains the logic behind the AI engine created by *Akash Dewan*.
 The AI uses five key financial pillars to analyze any stock and generate a
 final recommendation such as *STRONG BUY, **BUY, **HOLD, or **SELL*.
   
@@ -102,6 +105,8 @@ Average of all 5 → recommendation:
 - *6–7.9* → BUY
 - *4–5.9* → HOLD
 - *<4* → SELL
+
+This makes the system honest, transparent, and easy to understand.
 
 ⚠ Educational use only. Always do your own research.
 """)
@@ -189,7 +194,8 @@ with tabs[4]:
 # -------------------------------------------------
 with tabs[5]:
     st.title("📈 Stock Analysis")
-    st.warning("Educational purpose only.")
+    st.warning("⚠️ Disclaimer: This analysis is only for educational purposes. Please do your own research before investing.")
+    
 
     ticker = st.text_input("Enter NSE ticker")
     if ticker:
