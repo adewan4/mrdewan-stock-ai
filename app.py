@@ -72,28 +72,31 @@ with tabs[0]:
 # HOW AI WORKS
 # -------------------------------------------------
 with tabs[1]:
-    st.title("🧠 How the AI Works")
+    st.title("🧠 How the AI Gives Recommendations")
 
     st.markdown("""
-This AI *does NOT predict prices*.  
+This page explains the logic behind the AI engine created by *Mr. Dewan*.
+The AI uses five key financial pillars to analyze any stock and generate a
+final recommendation such as *STRONG BUY, **BUY, **HOLD, or **SELL*.
+  
 It *scores stocks objectively* using 5 pillars:
 
-### ⿡ Intrinsic Value
+📌 1. Intrinsic Value Score
 Is the stock undervalued compared to earnings & book value?
 
-### ⿢ Growth
+📌 2. Growth
 ROE, ROCE, revenue growth, profit margins.
 
-### ⿣ Risk
+📌 3. Risk
 Debt-to-equity — lower debt = higher score.
 
-### ⿤ Valuation
+📌 4. Valuation
 Compares stock PE with industry-adjusted PE.
 
-### ⿥ Momentum
+📌 5. Momentum
 Position of price between 52-week high & low.
 
-### 🎯 Final Score
+🎯 Final Recommendation
 Average of all 5 → recommendation:
 - *8+* → STRONG BUY
 - *6–7.9* → BUY
