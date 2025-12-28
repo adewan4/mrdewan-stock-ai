@@ -45,7 +45,7 @@ tabs = st.tabs([
     "Financials",
     "AI Screener",
     "Stock Analysis",
-    "⚡ Intraday Screener",
+    "⚡ Intraday Screener"
 ])
 
 # -------------------------------------------------
