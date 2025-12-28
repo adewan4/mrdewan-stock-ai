@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import yfinance as yf
 import os
-from ai_engine import fetch_basic_info, calculate_scores_from_info, intraday_signal
+from ai_engine import (fetch_basic_info, calculate_scores_from_info, intraday_signal)
 
 # -------------------------------------------------
 # PAGE CONFIG + MOBILE FRIENDLY
